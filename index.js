@@ -15,6 +15,7 @@ async function run(){
     await client.connect();
     const bikePartCollection = client.db('bikeManufacture').collection('bikeParts');
     const reviewCollection = client.db('bikeManufacture').collection('reviews');
+    const orderCollection = client.db('bikeManufacture').collection('orders');
 
     app.get('/bikeParts', async(req, res)=> {
       const query = {};
@@ -53,6 +54,13 @@ async function run(){
       const result = await bikePartCollection.updateOne(query, updateAmount, options);
       res.send(result)
     })
+
+    app.post('/orders', async(req, res) => {
+      const filter = req.body;
+      const result = await orderCollection.insertOne(filter)
+      res.send(result)
+    })
+
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
