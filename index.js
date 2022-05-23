@@ -27,6 +27,32 @@ async function run(){
       const result = await bikePartCollection.findOne(query);
       res.send(result)
     })
+    app.put('/bikeParts/:id', async(req, res)=> {
+      const id = req.params.id;
+      const amount = req.body;
+      const query = {_id:ObjectId(id)}
+      const options = {upsert: true}
+      const updateAmount = {
+        $set: {
+          minimumOrder: amount.orderAmount + 1
+        }
+      }
+      const result = await bikePartCollection.updateOne(query, updateAmount, options);
+      res.send(result)
+    })
+    app.patch('/bikeParts/:id', async(req, res)=> {
+      const id = req.params.id;
+      const amount = req.body;
+      const query = {_id:ObjectId(id)}
+      const options = {upsert: true}
+      const updateAmount = {
+        $set: {
+          minimumOrder: amount.orderAmount - 1
+        }
+      }
+      const result = await bikePartCollection.updateOne(query, updateAmount, options);
+      res.send(result)
+    })
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
