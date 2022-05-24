@@ -57,13 +57,25 @@ async function run(){
 
     app.post('/orders', async(req, res) => {
       const filter = req.body;
-      const result = await orderCollection.insertOne(filter)
-      res.send(result)
+      const query = {name: filter.name}
+      const existOrder = await orderCollection.findOne(query);
+      if(!existOrder){
+        const result = await orderCollection.insertOne(filter)
+        res.send(result)
+      }else{
+        return res.send({success: false})
+      }
     })
 
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
+      res.send(result)
+    })
+    app.get('/orders', async(req, res)=> {
+      const filter = req.query.email;
+      const userEmail = {userEmail: filter}
+      const result = await orderCollection.find(userEmail).toArray()
       res.send(result)
     })
   }finally{
