@@ -67,17 +67,24 @@ async function run(){
       }
     })
 
+    app.get('/orders', async(req, res)=> {
+      const filter = req.query.email;
+      const filterEmail = {userEmail: filter}
+      const result = await orderCollection.find(filterEmail).toArray()
+      res.send(result)
+    })
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
       res.send(result)
     })
-    app.get('/orders', async(req, res)=> {
-      const filter = req.query.email;
-      const userEmail = {userEmail: filter}
-      const result = await orderCollection.find(userEmail).toArray()
+    app.delete('/orders/:id', async(req, res) => {
+      const id = req.params.id;
+      const orderId = {_id:ObjectId(id)}
+      const result = await orderCollection.deleteOne(orderId)
       res.send(result)
     })
+    
   }finally{
 
   }
