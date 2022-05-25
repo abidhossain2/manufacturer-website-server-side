@@ -94,6 +94,21 @@ async function run(){
         clientSecret: paymentIntent.client_secret
       });
     })
+
+    app.patch('/orders/:id', async(req, res) => {
+      const id = req.params.id;
+      const filterId = {_id:ObjectId(id)}
+      const payId = req.body;
+      const updateField = {
+        $set: {
+          paid: true,
+          paymentId : payId
+        }
+      }
+      const result = await orderCollection.updateOne(filterId,updateField)
+      res.send(result)
+    })
+
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
