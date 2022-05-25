@@ -17,6 +17,7 @@ async function run(){
     const bikePartCollection = client.db('bikeManufacture').collection('bikeParts');
     const reviewCollection = client.db('bikeManufacture').collection('reviews');
     const orderCollection = client.db('bikeManufacture').collection('orders');
+    const userinfoCollection = client.db('bikeManufacture').collection('userinfo');
     
     app.get('/bikeParts', async(req, res)=> {
       const query = {};
@@ -66,6 +67,39 @@ async function run(){
       }else{
         return res.send({success: false})
       }
+    })
+
+    app.post('/reviews', async(req, res) => {
+      const filter = req.body;
+      const result = await reviewCollection.insertOne(filter)
+      res.send(result)
+    })
+
+    app.post('/myprofile', async(req, res) => {
+      const filter = req.body;
+      const query = {email:filter.email}
+      const existInfo = await userinfoCollection.findOne(query);
+      if(!existInfo){
+        const result = await userinfoCollection.insertOne(filter)
+        res.send(result)
+      }else{
+        return res.send({success: false})
+      }
+    })
+
+    
+
+    app.put('/myprofile/:email', async(req, res)=> {
+      const userUpdateInfo = req.body;
+      const query = {email: userUpdateInfo.email}
+      const options = {upsert: true}
+      const updateInfo = {
+        $set: {
+          userUpdateInfo
+        }
+      }
+      const result = await userinfoCollection.updateOne(query, updateInfo,options);
+      res.send(result)
     })
 
     app.get('/orders', async(req, res)=> {
