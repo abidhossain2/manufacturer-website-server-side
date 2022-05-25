@@ -6,6 +6,7 @@ const port = process.env.PORT || 5000;
 
 const app = express()
 app.use(cors())
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 app.use(express.json())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.qlpqx.mongodb.net/?retryWrites=true&w=majority`;
@@ -16,7 +17,7 @@ async function run(){
     const bikePartCollection = client.db('bikeManufacture').collection('bikeParts');
     const reviewCollection = client.db('bikeManufacture').collection('reviews');
     const orderCollection = client.db('bikeManufacture').collection('orders');
-
+    
     app.get('/bikeParts', async(req, res)=> {
       const query = {};
       const result = await bikePartCollection.find(query).toArray()
@@ -57,7 +58,7 @@ async function run(){
 
     app.post('/orders', async(req, res) => {
       const filter = req.body;
-      const query = {name: filter.name}
+      const query = {name: filter.name, userEmail:filter.userEmail}
       const existOrder = await orderCollection.findOne(query);
       if(!existOrder){
         const result = await orderCollection.insertOne(filter)
@@ -73,6 +74,26 @@ async function run(){
       const result = await orderCollection.find(filterEmail).toArray()
       res.send(result)
     })
+    app.get('/orders/:id', async(req, res)=> {
+      const filter = req.params.id;
+      const filterId = {_id: ObjectId(filter)}
+      const result = await orderCollection.findOne(filterId)
+      res.send(result)
+    })
+    app.post('/create-payment-intent', async(req, res) => {
+      const price = req.body;
+      const payPrice = price.price;
+      const total = payPrice * 100;
+    
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: 2000,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      });
+    })
     app.get('/reviews', async(req, res)=> {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
@@ -85,6 +106,7 @@ async function run(){
       res.send(result)
     })
     
+
   }finally{
 
   }
