@@ -75,6 +75,11 @@ async function run(){
       const result = await reviewCollection.insertOne(filter)
       res.send(result)
     })
+    app.post('/bikeparts', async(req, res) => {
+      const filter = req.body;
+      const result = await bikePartCollection.insertOne(filter)
+      res.send(result)
+    })
 
     app.put('/users/:email', async (req, res) => {
       const email = req.params.email;
