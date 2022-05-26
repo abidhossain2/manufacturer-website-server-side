@@ -111,6 +111,13 @@ async function run() {
       }
     })
 
+    app.delete('/adminuser/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) }
+      const deleteUser = await userCollection.deleteOne(query)
+      res.send(deleteUser)
+    })
+
     app.get('/user/:email', async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
