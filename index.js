@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 require('dotenv').config()
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -11,6 +12,23 @@ app.use(express.json())
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.qlpqx.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+function verifyToken(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth) {
+      return res.status(401).send({ message: 'Unauthorized Access' })
+  }
+  const token = auth[0];
+  jwt.verify(token, 'JWT_SECRET_KEY', function (err, decoded) {
+      if (err) {
+          return res.status(403).send({ message: 'Forbidden Access' })
+      }
+      req.decoded = decoded;
+      next();
+  });
+}
+
 async function run() {
   try {
     await client.connect();
@@ -20,12 +38,12 @@ async function run() {
     const userinfoCollection = client.db('bikeManufacture').collection('userinfo');
     const userCollection = client.db('bikeManufacture').collection('users');
 
-    app.get('/bikeParts', async (req, res) => {
+    app.get('/bikeParts',verifyToken, async (req, res) => {
       const query = {};
       const result = await bikePartCollection.find(query).toArray()
       res.send(result)
     })
-    app.get('/bikeParts/:id', async (req, res) => {
+    app.get('/bikeParts/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) }
       const result = await bikePartCollection.findOne(query);
@@ -96,7 +114,8 @@ async function run() {
         $set: user
       };
       const result = await userCollection.updateOne(filter, updateDoc, options)
-      res.send(result);
+      const token = jwt.sign(filter, 'JWT_SECRET_KEY', { expiresIn: '1h' });
+      res.send({result, token});
     })
     app.put('/adminuser/:email', async (req, res) => {
       const email = req.params.email;
@@ -118,7 +137,7 @@ async function run() {
       res.send(deleteUser)
     })
 
-    app.get('/allorders', async(req, res)=> {
+    app.get('/allorders',verifyToken, async(req, res)=> {
       const query ={}
       const result = await orderCollection.find(query).toArray()
       res.send(result)
@@ -130,7 +149,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/user/:email', async (req, res) => {
+    app.get('/user/:email',verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email: email }
       const userEmail = await userCollection.findOne(query)
@@ -152,7 +171,7 @@ async function run() {
 
 
 
-    app.put('/myprofile/:email', async (req, res) => {
+    app.put('/myprofile/:email',verifyToken, async (req, res) => {
       const userUpdateInfo = req.body;
       const query = { email: userUpdateInfo.email }
       const options = { upsert: true }
@@ -165,18 +184,18 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/orders', async (req, res) => {
+    app.get('/orders',verifyToken, async (req, res) => {
       const filter = req.query.email;
       const filterEmail = { userEmail: filter }
       const result = await orderCollection.find(filterEmail).toArray()
       res.send(result)
     })
-    app.get('/users', async (req, res) => {
+    app.get('/users',verifyToken, async (req, res) => {
       const filter = {}
       const result = await userCollection.find(filter).toArray()
       res.send(result)
     })
-    app.get('/orders/:id', async (req, res) => {
+    app.get('/orders/:id',verifyToken, async (req, res) => {
       const filter = req.params.id;
       const filterId = { _id: ObjectId(filter) }
       const result = await orderCollection.findOne(filterId)
@@ -211,7 +230,7 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/reviews', async (req, res) => {
+    app.get('/reviews',verifyToken, async (req, res) => {
       const query = {};
       const result = await reviewCollection.find(query).toArray()
       res.send(result)
