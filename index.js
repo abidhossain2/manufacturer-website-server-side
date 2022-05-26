@@ -18,6 +18,7 @@ async function run(){
     const reviewCollection = client.db('bikeManufacture').collection('reviews');
     const orderCollection = client.db('bikeManufacture').collection('orders');
     const userinfoCollection = client.db('bikeManufacture').collection('userinfo');
+    const userCollection = client.db('bikeManufacture').collection('users');
     
     app.get('/bikeParts', async(req, res)=> {
       const query = {};
@@ -74,6 +75,26 @@ async function run(){
       const result = await reviewCollection.insertOne(filter)
       res.send(result)
     })
+
+    app.put('/users/:email', async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+          $set: user
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options)
+      res.send(result);
+  })
+
+  app.get('/user/:email', async(req, res) => {
+    const email = req.params.email;
+    const query = {email: email}
+    const userEmail = await userCollection.findOne(query)
+    const userAdmin = userEmail.role === 'admin'
+    res.send({admin: userAdmin})
+  })
 
     app.post('/myprofile', async(req, res) => {
       const filter = req.body;
