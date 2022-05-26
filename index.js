@@ -31,6 +31,12 @@ async function run(){
       const result = await bikePartCollection.findOne(query);
       res.send(result)
     })
+    app.delete('/bikeParts/:id', async(req, res)=> {
+      const id = req.params.id;
+      const query = {_id:ObjectId(id)}
+      const result = await bikePartCollection.deleteOne(query);
+      res.send(result)
+    })
     app.put('/bikeParts/:id', async(req, res)=> {
       const id = req.params.id;
       const amount = req.body;
