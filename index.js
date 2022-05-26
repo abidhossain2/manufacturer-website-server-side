@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors');
 require('dotenv').config()
-const jwt = require('jsonwebtoken');
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 
@@ -134,13 +134,14 @@ async function run() {
       res.send(result)
     })
 
+
     app.get('/user/:email', async (req, res) => {
       const email = req.params.email;
-      const query = { email: email }
-      const userEmail = await userCollection.findOne(query)
-      const userAdmin = userEmail.role === 'admin'
+      const filter = {email: email}
+      const userEmail = await userCollection.findOne(filter);
+      const userAdmin = userEmail.role === 'admin';
       res.send({ admin: userAdmin })
-    })
+  })
 
     app.post('/myprofile', async (req, res) => {
       const filter = req.body;
