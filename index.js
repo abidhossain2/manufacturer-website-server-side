@@ -105,8 +105,8 @@ async function run() {
     app.put('/adminuser/:email', async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
-      const userEmail = await userCollection.findOne({ email: filter });
-      if (userEmail.role === '') {
+      const userEmail = await userCollection.findOne({email});
+      if (!userEmail.role) {
         const updateDoc = {
           $set: { role: 'admin' }
         };
@@ -210,6 +210,18 @@ async function run() {
         $set: {
           paid: true,
           paymentId: payId
+        }
+      }
+      const result = await orderCollection.updateOne(filterId, updateField)
+      res.send(result)
+    })
+
+    app.patch('/allorders/:id', async (req, res) => {
+      const id = req.params.id;
+      const filterId = { _id: ObjectId(id) }
+      const updateField = {
+        $set: {
+          shipped: true,
         }
       }
       const result = await orderCollection.updateOne(filterId, updateField)
