@@ -2,7 +2,7 @@
 
 Live site link: https://bike-manufacture.web.app/
 
-## Project detail
+## Project details
 * In this site I use mongodb to store data. 
 * I create some api such as get, put, patch, delete, post.
 * I use expressJs for CRUD operation.
