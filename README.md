@@ -1,6 +1,6 @@
 # Delta Two Wheeler Industry 
 
-Live site link: https://bike-manufacture.web.app/
+Live site link: https://bike-manufacture.web.app
 
 ## Project details
 * In this site I use mongodb to store data. 
